@@ -1,5 +1,5 @@
 {
-  "name": "kodikwrapper",
+  "name": "@typedanimetools/kodikwrapper",
   "version": "1.0.0",
   "description": "A kodikapi.com wrapper for Node.JS",
   "main": "dist/index.js",

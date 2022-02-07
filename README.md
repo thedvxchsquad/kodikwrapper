@@ -6,15 +6,15 @@ A kodikapi.com wrapper for Node.JS
 
 ## Установка
 ```bash
-npm i kodikwrapper
+npm i @typedanimetools/kodikwrapper
 ```
 
 ## Использования
 Смотрите все доступные методы в [📖 Документации](https://typedanimetools.github.io/kodikwrapper/index.html).
 ```typescript
-import { Client } from "kodikwrapper"; // ESM / TypeScript
+import { Client } from "@typedanimetools/kodikwrapper"; // ESM / TypeScript
 // OR
-const { Client } = require("kodikwrapper");
+const { Client } = require("@typedanimetools/kodikwrapper"); // CommonJS
 
 // Create client 
 const client = new Client({

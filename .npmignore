@@ -1,0 +1,11 @@
+/.idea
+/.github
+/docs
+/test
+/scripts
+/src
+/build
+.gitignore
+.eslintrc.json
+babel.config.json
+tsconfig.json

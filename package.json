@@ -1,0 +1,34 @@
+{
+  "name": "kodikwrapper",
+  "version": "1.0.0",
+  "description": "A kodikapi.com wrapper for Node.JS",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "prebuild": "tsc",
+    "build": "babel build --out-dir dist --copy-files",
+    "test": "mocha",
+    "docs": "typedoc --out docs src/index.ts --gitRevision master"
+  },
+  "dependencies": {
+    "axios": "^0.25.0",
+    "qs": "^6.10.3"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.12.1",
+    "@babel/core": "^7.12.3",
+    "@babel/plugin-transform-modules-commonjs": "^7.12.1",
+    "@babel/preset-env": "^7.16.11",
+    "@types/mocha": "^9.1.0",
+    "@types/node": "^16.0.0",
+    "@types/qs": "^6.9.7",
+    "mocha": "^9.2.0",
+    "typedoc": "^0.22.11",
+    "typescript": "^4.1.3"
+  },
+  "keywords": [
+    "kodik"
+  ],
+  "author": "typedanimetools",
+  "license": "MIT"
+}

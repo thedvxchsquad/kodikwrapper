@@ -6,7 +6,7 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "pnpm test && tsc",
-    "test": "mocha",
+    "test": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha -r ts-node/register 'tests/**/*.ts'",
     "docs": "typedoc --out docs src/index.ts --gitRevision master"
   },
   "dependencies": {

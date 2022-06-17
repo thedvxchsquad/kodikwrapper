@@ -5,7 +5,7 @@ import {
 } from "./schemas";
 import { Agent, globalAgent } from "https";
 
-interface ClientOptions {
+export interface ClientOptions {
   token: string;
   agent?: Agent;
   kodikApiUrl?: string;

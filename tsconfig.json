@@ -8,12 +8,12 @@
       "dom",
       "dom.iterable"
     ],
-    "outDir": "build",
+    "outDir": "dist",
     "declaration": true,
     "experimentalDecorators": true,
     "strict": true,
     "esModuleInterop": true,
-    "module": "ESNext",
+    "module": "CommonJS",
     "moduleResolution": "node",
     "target": "ES2020"
   }

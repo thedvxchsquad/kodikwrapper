@@ -1,10 +1,9 @@
 import axios from "axios";
 import { ArrayAsObject } from "./utils";
 
-export const isLink =
-  /^(?:https?:)?\/\/(?:[a-z\.]+)\/([a-zA-Z]+)\/(\d+)\/([a-zA-Z0-9]+)\/(\d+)p$/;
+export const linkPlayerRegex = /^(?<protocol>http[s]?:|)\/\/(?<host>[a-z0-9]+\.[a-z]+)\/(?<type>serial|video)\/(?<id>\d+)\/(?<hash>[0-9a-z]+)\/(?<quality>\d+p)$/;
 
-interface ParsedLink {
+export interface ParsedLink {
   type: string;
   id: string;
   hash: string;
@@ -16,16 +15,20 @@ interface ParsedLink {
   ref?: string;
   ref_sign?: string;
 }
-interface Source {
+export interface Source {
   src: string;
   type: string;
 }
-interface VideoLinks {
+export type VideoLinksTypes = Record<
+  "links", 
+  Record<
+    "720" | "480" | "360" | "240" | string, 
+    Source[]
+  >
+>
+export type VideoLinksParsed = {
   parsed?: ParsedLink;
-  links: {
-    [quality: string]: Source[]
-  }
-}
+} & VideoLinksTypes;
 
 export class ParseError extends Error {
   name: string = "ParseError";
@@ -54,40 +57,29 @@ export async function parseLink(
   params.host = "host" in params ? params.host : "https://kodik.cc"
 
   if (!params.link) throw new ParseError("link is undefined");
-  if (!isLink.test(params.link)) throw new Error("link is not allowed");
-  const [, type, id, hash, quality] = isLink.exec(params.link)!;
-  let _params = {
-    type,
-    id,
-    hash,
-    quality,
+  if (!linkPlayerRegex.test(params.link)) throw new Error("link is not allowed");
+  const data: ParsedLink = {
+    hash: "",
+    id: "",
+    quality: "",
+    type: ""
   };
-  if (params.extended == true) {
-    const page = await axios.get<string>(
-      `${params.host}/${_params.type}/${_params.id}/${_params.hash}/${_params.quality}p`
-    );
-    const matched = page.data.match(
-      /iframe\.src = "\/\/(?:[a-z\.]+)\/go\/([a-zA-Z]+)\/(\d+)\/([a-zA-Z0-9]+)\/(\d+)p\?d=([a-zA-Z0-9\.]+)&d_sign=([a-z0-9]+)&pd=([a-zA-Z0-9\.]+)&pd_sign=([a-z0-9]+)&ref=&ref_sign=([a-z0-9]+).+";/
-    );
-    if (!matched) throw new ParseError("Не могу распарсить страницу");
-
-    _params = {
-      ..._params,
-      ...ArrayAsObject({
-        type: 1,
-        id: 2,
-        hash: 3,
-        quality: 4,
-        d: 5,
-        d_sign: 6,
-        pd: 7,
-        pd_sign: 8,
-        ref_sign: 9,
-      })(matched),
-      ref: "",
+  const linkParams = linkPlayerRegex.exec(params.link)!;
+  if(!linkParams.groups) throw new Error(`cannot get "groups" from "linkParams"`);
+  Object.assign(data, linkParams.groups);
+  if(params.extended) {
+    try {
+      const page = await axios.get<string>(`${linkParams.groups.protocol.length === 0 ? "https:" : ""}${params.link}`);
+      const pageMatch = page.data.match(/iframe\.src\s*=\s*"(?<url>[^"]+)";/);
+      if(!pageMatch?.groups?.url) throw "ывзаыхвахывха че за";
+      const extFields = new URL("https:" + pageMatch.groups.url);
+      const obj = Array.from(extFields.searchParams).reduce((p, [k,v]) => (p[k]=v, p), {} as Record<string, string>);
+      return {...data, ...obj};
+    } catch (error) {
+      throw new ParseError("cannot get extended fields")
     };
-  }
-  return _params;
+  };
+  return data;
 }
 
 export interface GetLinksParams {
@@ -105,7 +97,7 @@ export interface GetLinksParams {
   host?: string;
 }
 
-export async function getLinks(params: GetLinksParams): Promise<VideoLinks> {
+export async function getLinks(params: GetLinksParams): Promise<VideoLinksParsed> {
   
   params.extended = params.extended || false;
   params.host = "host" in params ? params.host : "https://kodik.cc"
@@ -114,26 +106,15 @@ export async function getLinks(params: GetLinksParams): Promise<VideoLinks> {
     ...params,
     extended: true
   });
-  const postresponse = await axios.post(`${params.host}/gvi`, null, {
+  const rawVideoLinksResponse = await axios.post<VideoLinksTypes>("https://aniqit.com/gvi", null, {
     params: parsedLink
   });
-
-  for (const key of Object.keys(postresponse.data.links)) {
-    postresponse.data.links[key].map(
-      (video: { src: string }) => (
-        (video.src = Buffer.from(
-          video.src.split("").reverse().join(""),
-          "base64"
-        ).toString("utf-8")),
-        video
-      )
-    );
-  }
-
+  const videoLinks = Object.entries(rawVideoLinksResponse.data.links).reduce((response, [q, src]) => {
+    response.links[q] = src
+    return response
+  }, {links: {}} as VideoLinksTypes);
   return {
-    ...(params.extended && {
-      params: parsedLink
-    }),
-    links: postresponse.data.links,
-  };
+    ...videoLinks,
+    ...(params.extended ? {params} : {})
+  }
 }

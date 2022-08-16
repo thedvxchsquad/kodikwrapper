@@ -1,39 +1,43 @@
 import axios from "axios";
 
-export const linkPlayerRegex = /^(?<protocol>http[s]?:|)\/\/(?<host>[a-z0-9]+\.[a-z]+)\/(?<type>video|seria|season)\/(?<id>\d+)\/(?<hash>[0-9a-z]+)\/(?<quality>\d+p)$/;
+export const kodikPlayerLinkRegexp = /^(?<protocol>http[s]?:|)\/\/(?<host>[a-z0-9]+\.[a-z]+)\/(?<type>video|seria|season)\/(?<id>\d+)\/(?<hash>[0-9a-z]+)\/(?<quality>\d+p)$/;
 
-export interface ParsedLink {
+// parseLink types
+export type KodikParsedLink = KodikParsedLinkParams & KodikParsedLinkExParams;
+interface KodikParsedLinkParams {
   type: string;
   id: string;
   hash: string;
   quality: string;
+};
+export interface KodikParsedLinkExParams {
   d?: string;
   d_sign?: string;
   pd?: string;
   pd_sign?: string;
   ref?: string;
   ref_sign?: string;
-}
-export interface Source {
+};
+
+export interface KodikVideos {
+  parsed?: KodikParsedLink;
+  links: KodikVideoLinksType;
+};
+export type KodikVideoLinksType = Record<KodikVideoSourceQuality, KodikVideoSource[]>;
+export type KodikVideoSourceQuality = "1080" | "720" | "480" | "360" | "240" | string;
+export interface KodikVideoSource {
   src: string;
   type: string;
-}
-export type VideoLinksTypes = Record<
-  "links",
-  Record<
-    "720" | "480" | "360" | "240" | string,
-    Source[]
-  >
->
-export type VideoLinksParsed = {
-  parsed?: ParsedLink;
-} & VideoLinksTypes;
+};
 
 export class ParseError extends Error {
   name: string = "ParseError";
-}
+};
+export class VideoLinksError extends Error {
+  name: string = "ParseError";
+};
 
-export interface ParseLinkParams {
+export interface VideoLinksParseParams {
   /**
    * Ссылка на плеер
    */
@@ -42,46 +46,10 @@ export interface ParseLinkParams {
    * Отправляет запрос на ссылку и получает дополнительную информацию
    */
   extended?: boolean;
-  /**
-   * Иной хост от kodik(на случай если что-то не так с kodik.cc)
-   */
-  host?: string;
-}
+};
 
-export async function parseLink(
-  params: ParseLinkParams
-): Promise<ParsedLink> {
 
-  params.extended = params.extended || false;
-  params.host = "host" in params ? params.host : "https://kodik.cc"
-
-  if (!params.link) throw new ParseError("link is undefined");
-  if (!linkPlayerRegex.test(params.link)) throw new Error("link is not allowed");
-  const data: ParsedLink = {
-    hash: "",
-    id: "",
-    quality: "",
-    type: ""
-  };
-  const linkParams = linkPlayerRegex.exec(params.link)!;
-  if (!linkParams.groups) throw new Error(`cannot get "groups" from "linkParams"`);
-  Object.assign(data, linkParams.groups);
-  if (params.extended) {
-    try {
-      const page = await axios.get<string>(`${linkParams.groups.protocol.length === 0 ? "https:" : ""}${params.link}`);
-      const pageMatch = page.data.match(/iframe\.src\s*=\s*"(?<url>[^"]+)";/);
-      if (!pageMatch?.groups?.url) throw "ывзаыхвахывха че за";
-      const extFields = new URL("https:" + pageMatch.groups.url);
-      const obj = Array.from(extFields.searchParams).reduce((p, [k, v]) => (p[k] = v, p), {} as Record<string, string>);
-      return { ...data, ...obj };
-    } catch (error) {
-      throw new ParseError("cannot get extended fields")
-    };
-  };
-  return data;
-}
-
-export interface GetLinksParams {
+export interface VideoLinksGetLinksParams {
   /**
    * Ссылка на плеер
    */
@@ -90,40 +58,65 @@ export interface GetLinksParams {
    * Добавляет поле params
    */
   extended?: boolean;
-  /**
-   * Иной хост от kodik(на случай если что-то не так с kodik.cc)
-   */
-  host?: string;
 }
 
-export async function getLinks(params: GetLinksParams): Promise<VideoLinksParsed> {
+export class VideoLinks {
+  static async parseLink(opts: VideoLinksParseParams): Promise<KodikParsedLink> {
 
-  params.extended = params.extended || false;
-  params.host = "host" in params ? params.host : "https://kodik.cc"
+    const isExtended = opts.extended ?? false;
+    const kodikLink = opts.link;
 
-  const parsedLink = await parseLink({
-    ...params,
-    extended: true
-  });
-  const rawVideoLinksResponse = await axios.post<VideoLinksTypes>("https://aniqit.com/gvi", null, {
-    params: parsedLink
-  });
-  const videoLinks = Object
-    .entries(rawVideoLinksResponse.data.links)
-    .reduce(
-      (response, qualityVariant) => (
-        response[qualityVariant[0]] = qualityVariant[1]
-          .map(
-            sourceVariant => (
-              {
-                ...sourceVariant,
-                src: Buffer.from(sourceVariant.src.split("").reverse().join(""), "base64").toString()
-              }
-            )
-          ),
-        response), {} as VideoLinksTypes["links"]);
-  return {
-    links: videoLinks,
-    ...(params.extended ? { params } : {})
+    if (!kodikLink) throw new ParseError("kodikLink is undefined");
+    if (!kodikPlayerLinkRegexp.test(kodikLink)) throw new Error("kodikLink is not allowed");
+    const parsedLink: KodikParsedLink = {
+      hash: "",
+      id: "",
+      quality: "",
+      type: ""
+    };
+    const linkParams = kodikPlayerLinkRegexp.exec(kodikLink)!;
+    if (!linkParams.groups) throw new Error(`cannot get "groups" from "linkParams"`);
+    linkParams.groups.protocol = linkParams.groups.protocol.length === 0 ? "https:" : ""
+    Object.assign(parsedLink, linkParams.groups);
+    if (isExtended) {
+      try {
+        const page = await axios.get<string>(`${linkParams.groups.protocol}${kodikLink}`);
+        const pageMatchurlParams = page.data.match(/var\s+urlParams\s*=\s*'(?<urlParams>[^']+)';/);
+        const urlParams = pageMatchurlParams?.groups?.urlParams
+        if (!urlParams) throw new ParseError("cannot get urlParams");
+        const extendedFields = JSON.parse(urlParams) as KodikParsedLinkExParams
+        return Object.assign(parsedLink, extendedFields);
+      } catch (error) {
+        console.log(error)
+        throw new ParseError("unknown error")
+      };
+    };
+    return parsedLink;
   }
+
+  static async getLinks(opts: VideoLinksGetLinksParams): Promise<KodikVideos> {
+
+    const isExtended = opts.extended ?? false;
+    const kodikLink = opts.link;
+
+    const kodikParsedLink = await VideoLinks.parseLink({
+      link: kodikLink,
+      extended: true
+    });
+    const kodikVideoLinks = await axios.post(`https://${kodikParsedLink.d}/gvi`, null, {
+      params: kodikParsedLink
+    }).then(res => res.data.links as KodikVideoLinksType);
+
+    for (const [, sources] of Object.entries(kodikVideoLinks)) {
+      for (const source of sources) {
+        source.src = Buffer.from(source.src.split("").reverse().join(""), "base64").toString("utf-8")
+      };
+    };
+
+    const kodikVideos: KodikVideos = { links: kodikVideoLinks };
+
+    if (isExtended) kodikVideos.parsed = kodikParsedLink;
+    return kodikVideos;
+  }
+
 }

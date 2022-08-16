@@ -1,20 +1,20 @@
 # kodikwrapper
 A kodikapi.com wrapper for Node.JS
 
-| 📖 [Documentation](https://typedanimetools.github.io/kodikwrapper/index.html) |
+| 📖 [Documentation](https://thedvxchsquad.github.io/kodikwrapper/index.html) |
 | ------------------------------------------------------------------------- |
 
 ## Установка
 ```bash
-npm i @typedanimetools/kodikwrapper
+npm i @thedvxchsquad/kodikwrapper
 ```
 
 ## Использования
-Смотрите все доступные методы в [📖 Документации](https://typedanimetools.github.io/kodikwrapper/index.html).
+Смотрите все доступные методы в [📖 Документации](https://thedvxchsquad.github.io/kodikwrapper/index.html).
 ```typescript
-import { Client } from "@typedanimetools/kodikwrapper"; // ESM / TypeScript
+import { Client } from "@thedvxchsquad/kodikwrapper"; // ESM / TypeScript
 // OR
-const { Client } = require("@typedanimetools/kodikwrapper"); // CommonJS
+const { Client } = require("@thedvxchsquad/kodikwrapper"); // CommonJS
 
 // Create client 
 const client = new Client({

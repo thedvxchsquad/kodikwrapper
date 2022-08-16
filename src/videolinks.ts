@@ -1,5 +1,4 @@
 import axios from "axios";
-import { ArrayAsObject } from "./utils";
 
 export const linkPlayerRegex = /^(?<protocol>http[s]?:|)\/\/(?<host>[a-z0-9]+\.[a-z]+)\/(?<type>video|seria|season)\/(?<id>\d+)\/(?<hash>[0-9a-z]+)\/(?<quality>\d+p)$/;
 

@@ -41,7 +41,7 @@ export interface ListParams extends FilterByAnotherDatabase {
   /**
    * Фильтрация материалов по году. Если указать этот параметр, то будут выведены только материалы соответствующего года
    */
-  year?: number;
+  year?: AllowArray<number>;
   /**
    * Фильтрация материалов по ID озвучки. ID всех озвучек можно получить через API ресурс /translations либо на странице списка озвучек.
    */

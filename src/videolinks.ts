@@ -34,7 +34,7 @@ export class ParseError extends Error {
   name: string = "ParseError";
 };
 export class VideoLinksError extends Error {
-  name: string = "ParseError";
+  name: string = "VideoLinksError";
 };
 
 export interface VideoLinksParseParams {

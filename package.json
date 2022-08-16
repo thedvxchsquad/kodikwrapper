@@ -1,6 +1,6 @@
 {
-  "name": "@typedanimetools/kodikwrapper",
-  "version": "1.0.2",
+  "name": "@thedvxchsquad/kodikwrapper",
+  "version": "1.0.3",
   "description": "A kodikapi.com wrapper for Node.JS",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -27,6 +27,11 @@
   "keywords": [
     "kodik"
   ],
-  "author": "typedanimetools",
+  "homepage": "https://github.com/thedvxchsquad/kodikwrapper",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/thedvxchsquad/kodikwrapper.git"
+  },
+  "author": "thedvxchsquad",
   "license": "MIT"
 }

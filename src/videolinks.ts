@@ -1,7 +1,5 @@
 import axios from "axios";
 
-export const kodikPlayerLinkRegexp = /^(?<protocol>http[s]?:|)\/\/(?<host>[a-z0-9]+\.[a-z]+)\/(?<type>video|seria|season)\/(?<id>\d+)\/(?<hash>[0-9a-z]+)\/(?<quality>\d+p)$/;
-
 // parseLink types
 export type KodikParsedLink = KodikParsedLinkParams & KodikParsedLinkExParams;
 interface KodikParsedLinkParams {
@@ -61,26 +59,33 @@ export interface VideoLinksGetLinksParams {
 }
 
 export class VideoLinks {
+  
+  static kodikPlayerLinkRegexp = /^(?<protocol>http[s]?:|)\/\/(?<host>[a-z0-9]+\.[a-z]+)\/(?<type>[a-z]+)\/(?<id>\d+)\/(?<hash>[0-9a-z]+)\/(?<quality>\d+p)$/;
+
   static async parseLink(opts: VideoLinksParseParams): Promise<KodikParsedLink> {
 
     const isExtended = opts.extended ?? false;
     const kodikLink = opts.link;
 
     if (!kodikLink) throw new ParseError("kodikLink is undefined");
-    if (!kodikPlayerLinkRegexp.test(kodikLink)) throw new Error("kodikLink is not allowed");
+    if (!this.kodikPlayerLinkRegexp.test(kodikLink)) throw new Error("kodikLink is not allowed");
     const parsedLink: KodikParsedLink = {
       hash: "",
       id: "",
       quality: "",
       type: ""
     };
-    const linkParams = kodikPlayerLinkRegexp.exec(kodikLink)!;
+    const linkParams = this.kodikPlayerLinkRegexp.exec(kodikLink)!;
     if (!linkParams.groups) throw new Error(`cannot get "groups" from "linkParams"`);
     linkParams.groups.protocol = linkParams.groups.protocol.length === 0 ? "https:" : ""
     Object.assign(parsedLink, linkParams.groups);
     if (isExtended) {
       try {
-        const page = await axios.get<string>(`${linkParams.groups.protocol}${kodikLink}`);
+        const page = await axios.get<string>(`${linkParams.groups.protocol}${kodikLink}`, {
+          headers: {
+            'Origin': `https://${linkParams?.groups?.host ?? 'kodik.info'}`
+          }
+        });
         const pageMatchurlParams = page.data.match(/var\s+urlParams\s*=\s*'(?<urlParams>[^']+)';/);
         const urlParams = pageMatchurlParams?.groups?.urlParams
         if (!urlParams) throw new ParseError("cannot get urlParams");

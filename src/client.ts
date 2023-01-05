@@ -3,11 +3,11 @@ import axios, { AxiosInstance } from "axios";
 import {
   APIMethods
 } from "./schemas";
-import { Agent, globalAgent } from "https";
+// import { Agent, globalAgent } from "https";
 
 export interface ClientOptions {
   token: string;
-  agent?: Agent;
+  // agent?: Agent;
   kodikApiUrl?: string;
 }
 
@@ -20,17 +20,17 @@ export class ClientError extends Error {
 
 export class Client {
   private axios: AxiosInstance;
-  private agent: Agent;
+  // private agent: Agent;
   public KODIK_API_URL: string;
   constructor(options: ClientOptions) {
-    this.agent = options.agent || globalAgent;
+    // this.agent = options.agent || globalAgent;
     this.KODIK_API_URL = options.kodikApiUrl || KODIK_API_URL
     this.axios = axios.create({
       params: {
         token: options.token,
       },
-      httpAgent: this.agent,
-      httpsAgent: this.agent,
+      // httpAgent: this.agent,
+      // httpsAgent: this.agent,
       validateStatus: (_) => true,
       paramsSerializer: (params) => {
         return StringifyQuery(params, { arrayFormat: "comma" });

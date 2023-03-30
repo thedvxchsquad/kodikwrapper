@@ -3,13 +3,13 @@ import {
   FilterByAnotherDatabase,
   ReleaseType,
   TranslationType,
-} from "./types";
+} from './types';
 
 export interface GenresParams extends FilterByAnotherDatabase {
   /**
    * Какие жанры выводить. Изначально выводятся только жанры с КиноПоиска. Можно также выбрать вывод жанров с Shikimori, MyDramaList, либо сразу всех жанров с обоих ресурсов.
    */
-  genres_type?: "kinopoisk" | "shikimori" | "mydramalist" | "all";
+  genres_type?: 'kinopoisk' | 'shikimori' | 'mydramalist' | 'all';
   /**
    * Фильтрация материалов по их типу. Для удобства доступно большое количество типов фильмов и сериалов. Необходимые типы указываются через запятую
    */
@@ -29,7 +29,7 @@ export interface GenresParams extends FilterByAnotherDatabase {
   /**
    * Сортировка результатов. По названию жанра либо по количеству материалов с этим жанром.
    */
-  sort?: "title" | "count";
+  sort?: 'title' | 'count';
 }
 
 export interface GenresResponseObject {

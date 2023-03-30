@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios from 'axios';
 
 // parseLink types
 export type KodikParsedLink = KodikParsedLinkParams & KodikParsedLinkExParams;
@@ -22,17 +22,17 @@ export interface KodikVideos {
   links: KodikVideoLinksType;
 };
 export type KodikVideoLinksType = Record<KodikVideoSourceQuality, KodikVideoSource[]>;
-export type KodikVideoSourceQuality = "1080" | "720" | "480" | "360" | "240" | string;
+export type KodikVideoSourceQuality = '1080' | '720' | '480' | '360' | '240' | string;
 export interface KodikVideoSource {
   src: string;
   type: string;
 };
 
 export class ParseError extends Error {
-  name: string = "ParseError";
+  name: string = 'ParseError';
 };
 export class VideoLinksError extends Error {
-  name: string = "VideoLinksError";
+  name: string = 'VideoLinksError';
 };
 
 export interface VideoLinksParseParams {
@@ -46,7 +46,6 @@ export interface VideoLinksParseParams {
   extended?: boolean;
 };
 
-
 export interface VideoLinksGetLinksParams {
   /**
    * Ссылка на плеер
@@ -59,25 +58,23 @@ export interface VideoLinksGetLinksParams {
 }
 
 export class VideoLinks {
-  
   static kodikPlayerLinkRegexp = /^(?<protocol>http[s]?:|)\/\/(?<host>[a-z0-9]+\.[a-z]+)\/(?<type>[a-z]+)\/(?<id>\d+)\/(?<hash>[0-9a-z]+)\/(?<quality>\d+p)$/;
 
   static async parseLink(opts: VideoLinksParseParams): Promise<KodikParsedLink> {
-
     const isExtended = opts.extended ?? false;
     const kodikLink = opts.link;
 
-    if (!kodikLink) throw new ParseError("kodikLink is undefined");
-    if (!this.kodikPlayerLinkRegexp.test(kodikLink)) throw new Error("kodikLink is not allowed");
+    if (!kodikLink) throw new ParseError('kodikLink is undefined');
+    if (!this.kodikPlayerLinkRegexp.test(kodikLink)) throw new ParseError('kodikLink is not allowed');
     const parsedLink: KodikParsedLink = {
-      hash: "",
-      id: "",
-      quality: "",
-      type: ""
+      hash: '',
+      id: '',
+      quality: '',
+      type: ''
     };
     const linkParams = this.kodikPlayerLinkRegexp.exec(kodikLink)!;
-    if (!linkParams.groups) throw new Error(`cannot get "groups" from "linkParams"`);
-    linkParams.groups.protocol = linkParams.groups.protocol.length === 0 ? "https:" : ""
+    if (!linkParams.groups) throw new ParseError(`cannot get 'groups' from 'linkParams'`);
+    linkParams.groups.protocol = linkParams.groups.protocol.length === 0 ? 'https:' : ''
     Object.assign(parsedLink, linkParams.groups);
     if (isExtended) {
       try {
@@ -88,19 +85,18 @@ export class VideoLinks {
         });
         const pageMatchurlParams = page.data.match(/var\s+urlParams\s*=\s*'(?<urlParams>[^']+)';/);
         const urlParams = pageMatchurlParams?.groups?.urlParams
-        if (!urlParams) throw new ParseError("cannot get urlParams");
+        if (!urlParams) throw new ParseError('cannot get urlParams');
         const extendedFields = JSON.parse(urlParams) as KodikParsedLinkExParams
         return Object.assign(parsedLink, extendedFields);
       } catch (error) {
-        console.log(error)
-        throw new ParseError("unknown error")
+        // console.error(error)
+        throw new ParseError('unknown error')
       };
     };
     return parsedLink;
   }
 
   static async getLinks(opts: VideoLinksGetLinksParams): Promise<KodikVideos> {
-
     const isExtended = opts.extended ?? false;
     const kodikLink = opts.link;
 
@@ -109,12 +105,16 @@ export class VideoLinks {
       extended: true
     });
     const kodikVideoLinks = await axios.post(`https://${kodikParsedLink.d}/gvi`, null, {
-      params: kodikParsedLink
+      params: kodikParsedLink,
+      validateStatus: null
     }).then(res => res.data.links as KodikVideoLinksType);
-
+    const zCharCode = 'Z'.charCodeAt(0);
     for (const [, sources] of Object.entries(kodikVideoLinks)) {
       for (const source of sources) {
-        source.src = Buffer.from(source.src.split("").reverse().join(""), "base64").toString("utf-8")
+        source.src = Buffer.from(source.src.replace(/[a-zA-Z]/g, e => {
+          let eCharCode = e.charCodeAt(0);
+          return String.fromCharCode((eCharCode <= zCharCode ? 90 : 122) >= (eCharCode = eCharCode + 13) ? eCharCode : eCharCode - 26)
+        }), 'base64').toString('utf8')
       };
     };
 
@@ -123,5 +123,8 @@ export class VideoLinks {
     if (isExtended) kodikVideos.parsed = kodikParsedLink;
     return kodikVideos;
   }
-
 }
+
+VideoLinks.getLinks({
+  link: 'https://kodik.info/seria/1104862/2669da68e1c44fbf76c38e89fd8f6d7a/720p',
+}).then(r => r.links['360']).then(console.log)

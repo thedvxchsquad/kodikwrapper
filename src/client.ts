@@ -1,9 +1,9 @@
-import { stringify as StringifyQuery } from "qs";
-import axios, { AxiosInstance } from "axios";
+import { stringify as StringifyQuery } from 'qs';
+import axios, { AxiosInstance } from 'axios';
 import {
   APIMethods
-} from "./schemas";
-// import { Agent, globalAgent } from "https";
+} from './schemas';
+// import { Agent, globalAgent } from 'https';
 
 export interface ClientOptions {
   token: string;
@@ -11,11 +11,11 @@ export interface ClientOptions {
   kodikApiUrl?: string;
 }
 
-const KODIK_API_URL = "https://kodikapi.com";
-const endpoints = ["countries", "genres", "list", "qualities", "search", "translations", "years"];
+const KODIK_API_URL = 'https://kodikapi.com';
+const endpoints = ['countries', 'genres', 'list', 'qualities', 'search', 'translations', 'years'];
 
 export class ClientError extends Error {
-  name: string = "ClientError";
+  name: string = 'ClientError';
 }
 
 export class Client {
@@ -33,7 +33,7 @@ export class Client {
       // httpsAgent: this.agent,
       validateStatus: (_) => true,
       paramsSerializer: (params) => {
-        return StringifyQuery(params, { arrayFormat: "comma" });
+        return StringifyQuery(params, { arrayFormat: 'comma' });
       },
     });
 
@@ -45,7 +45,7 @@ export class Client {
           params
         }).then(
           res => {
-            if("error" in res.data) throw new ClientError(res.data.error)
+            if('error' in res.data) throw new ClientError(res.data.error)
             return res.data
           }
         )

@@ -1,9 +1,9 @@
-import { CountriesParams, CountriesResponse } from "./countries";
-import { GenresParams, GenresResponse } from "./genres";
-import { ListParams, ListResponse } from "./list";
-import { QualitiesParams, QualitiesResponse } from "./qualities";
-import { SearchParams, SearchResponse } from "./search";
-import { TranslationsParams, TranslationsResponse } from "./translations";
+import { CountriesParams, CountriesResponse } from './countries';
+import { GenresParams, GenresResponse } from './genres';
+import { ListParams, ListResponse } from './list';
+import { QualitiesParams, QualitiesResponse } from './qualities';
+import { SearchParams, SearchResponse } from './search';
+import { TranslationsParams, TranslationsResponse } from './translations';
 
 export interface APIMethods {
     countries(params: CountriesParams): Promise<CountriesResponse>;

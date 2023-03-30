@@ -3,7 +3,7 @@ import {
   FilterByAnotherDatabase,
   ReleaseType,
   TranslationType,
-} from "./types";
+} from './types';
 
 export interface YearsParams extends FilterByAnotherDatabase {
   /**
@@ -21,7 +21,7 @@ export interface YearsParams extends FilterByAnotherDatabase {
   /**
    * Сортировка результатов. По названию жанра либо по количеству материалов с этим жанром.
    */
-  sort?: "year" | "count";
+  sort?: 'year' | 'count';
 }
 
 export interface YearsResponseObject {

@@ -1,6 +1,6 @@
 import {
   FilterByAnotherDatabase
-} from "./types";
+} from './types';
 
 export interface QualitiesParams extends FilterByAnotherDatabase {}
 

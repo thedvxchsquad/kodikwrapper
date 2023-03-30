@@ -1,47 +1,47 @@
 export type AllowArray<T> = T | T[];
 
 export type ReleaseType =
-  | "foreign-movie"
-  | "soviet-cartoon"
-  | "foreign-cartoon"
-  | "russian-cartoon"
-  | "anime"
-  | "russian-movie"
-  | "cartoon-serial"
-  | "documentary-serial"
-  | "russian-serial"
-  | "foreign-serial"
-  | "anime-serial"
-  | "multi-part-film";
+  | 'foreign-movie'
+  | 'soviet-cartoon'
+  | 'foreign-cartoon'
+  | 'russian-cartoon'
+  | 'anime'
+  | 'russian-movie'
+  | 'cartoon-serial'
+  | 'documentary-serial'
+  | 'russian-serial'
+  | 'foreign-serial'
+  | 'anime-serial'
+  | 'multi-part-film';
 
-export type TranslationType = "voice" | "subtitles";
+export type TranslationType = 'voice' | 'subtitles';
 export type MPPARating =
-  | "G"
-  | "PG"
-  | "PG-13"
-  | "R"
-  | "R+"
-  | "Rx"
-  | "R"
-  | "PG-13";
+  | 'G'
+  | 'PG'
+  | 'PG-13'
+  | 'R'
+  | 'R+'
+  | 'Rx'
+  | 'R'
+  | 'PG-13';
 export type AnimeKind =
-  | "tv"
-  | "movie"
-  | "ova"
-  | "ona"
-  | "special"
-  | "music"
-  | "tv_13"
-  | "tv_24"
-  | "tv_48"
-  | "movie"
-  | "ova";
+  | 'tv'
+  | 'movie'
+  | 'ova'
+  | 'ona'
+  | 'special'
+  | 'music'
+  | 'tv_13'
+  | 'tv_24'
+  | 'tv_48'
+  | 'movie'
+  | 'ova';
 export type AnimeDramaAllStatus =
-  | "anons"
-  | "ongoing"
-  | "released"
-  | "ongoing"
-  | "released";
+  | 'anons'
+  | 'ongoing'
+  | 'released'
+  | 'ongoing'
+  | 'released';
 export type Translation = {
   id: number;
   title: string;
@@ -474,6 +474,6 @@ export interface SeasonsObject {
   [season: string | number]: SeasonObject;
 }
 export interface BlockedSeasonsObject {
-  [season: string | number]: "all" | string[];
+  [season: string | number]: 'all' | string[];
 }
 // export type

@@ -3,7 +3,7 @@ import {
   FilterByAnotherDatabase,
   ReleaseType,
   TranslationType,
-} from "./types";
+} from './types';
 
 export interface CountriesParams extends FilterByAnotherDatabase {
   /**
@@ -25,7 +25,7 @@ export interface CountriesParams extends FilterByAnotherDatabase {
   /**
    * Сортировка результатов. По названию жанра либо по количеству материалов с этим жанром.
    */
-  sort?: "title" | "count";
+  sort?: 'title' | 'count';
 }
 
 export interface CountriesResponseObject {

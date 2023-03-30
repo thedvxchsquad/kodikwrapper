@@ -124,7 +124,3 @@ export class VideoLinks {
     return kodikVideos;
   }
 }
-
-VideoLinks.getLinks({
-  link: 'https://kodik.info/seria/1104862/2669da68e1c44fbf76c38e89fd8f6d7a/720p',
-}).then(r => r.links['360']).then(console.log)

@@ -1,12 +1,12 @@
 import type {AllowArray} from '../types';
 import type {
   BlockedSeasonsObject,
-  FilterByExternalDatabase, MaterialData, MaterialType, SeasonsObject, TranslationType,
+  FilterByExternalDatabase, MaterialData, MaterialType, SeasonsObject, SharedFields, TranslationType,
 } from './shared-types';
 import {KodikResponseWithPagination} from './shared-types';
 import {TranslationV1Object} from './translations';
 
-export interface SearchParams extends FilterByExternalDatabase {
+export interface SearchParams extends FilterByExternalDatabase, SharedFields {
   title?: string;
   title_orig?: string;
   strict?: boolean;

@@ -1,4 +1,3 @@
-import {stringify as StringifyQuery} from 'qs';
 import axios, {AxiosInstance} from 'axios';
 import {
   APIMethods
@@ -31,16 +30,13 @@ export class Client {
   public KODIK_API_URL: string;
 
   constructor(options: ClientOptions) {
-    // this.agent = options.agent || globalAgent;
     this.KODIK_API_URL = options.kodikApiUrl || KODIK_API_URL;
     this.axios = axios.create({
       params: {
         token: options.token,
       },
       validateStatus: null,
-      paramsSerializer: (params) => {
-        return StringifyQuery(params, {arrayFormat: 'comma'});
-      },
+      paramsSerializer: (params) => new URLSearchParams(params).toString(),
     });
 
     for (const endpointKey of Object.keys(endpoints)) {

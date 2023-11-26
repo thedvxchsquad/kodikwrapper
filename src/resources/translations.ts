@@ -1,20 +1,12 @@
 import type {
-  FilterByExternalDatabase, KodikResponse,
-  SharedFields,
-  TranslationType,
+  FilterByExternalDatabase, KodikResponse, SharedFields,
+  TranslationV1Object
 } from './shared-types';
 
 export interface TranslationsParams {
 }
 
 export interface TranslationsV2Params extends FilterByExternalDatabase, Omit<SharedFields, 'translation_id'> {
-}
-
-
-export interface TranslationV1Object {
-  id: number;
-  title: string;
-  type: TranslationType;
 }
 
 export interface TranslationV2Object {

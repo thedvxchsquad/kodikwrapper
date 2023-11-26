@@ -1,4 +1,4 @@
-import {AllowArray, Nullable} from '../types';
+import type {AllowArray, Nullable} from '../types';
 
 export type MaterialMovieType =
   | 'foreign-movie'
@@ -24,6 +24,12 @@ export type ExternalDatabase =
   | 'mdl_id'
   | 'worldart_link'
   | 'shikimori_id';
+
+export type ExternalDatabaseGenresType =
+  | 'kinopoisk'
+  | 'shikimori'
+  | 'mydramalist'
+  | 'all';
 
 export type RatingMPAA =
   | 'G'
@@ -174,6 +180,54 @@ export interface SeasonsObject {
 
 export interface BlockedSeasonsObject {
   [season: string | number]: 'all' | string[];
+}
+
+export interface TranslationV1Object {
+  id: number;
+  title: string;
+  type: TranslationType;
+}
+
+export interface MaterialObject {
+  id: number;
+  title: string;
+  title_orig: string;
+  other_title: string;
+  link: string;
+  year: number;
+  kinopoisk_id: string | number;
+  imdb_id: string | number;
+  mdl_id: string | number;
+  worldart_link: string;
+  shikimori_id: number;
+  type: MaterialType;
+  quality: string;
+  caprip: boolean;
+  lgbt: boolean;
+  translation: TranslationV1Object;
+  created_at: string;
+  updated_at: string;
+  blocked_countries: string[];
+  seasons?: SeasonsObject;
+  last_season?: number;
+  last_episode?: number;
+  episodes_count?: number;
+  blocked_seasons?: BlockedSeasonsObject | 'all';
+  screenshots: string[];
+  material_data?: MaterialData;
+}
+
+export interface SharedSearchListFields {
+  limit?: number;
+  camrip?: boolean;
+  with_seasons?: boolean;
+  with_episodes?: boolean;
+  with_episodes_data?: boolean;
+  with_page_links?: boolean;
+  not_blocked_in?: AllowArray<string>;
+  not_blocked_for_me?: boolean;
+  with_material_data?: boolean;
+  next?: string;
 }
 
 export interface KodikResponse<T> {

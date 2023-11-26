@@ -1,15 +1,10 @@
 import type {
   FilterByExternalDatabase, KodikResponse, SharedFields,
+  ExternalDatabaseGenresType
 } from './shared-types';
 
-export type GenresType =
-  | 'kinopoisk'
-  | 'shikimori'
-  | 'mydramalist'
-  | 'all';
-
 export interface GenresParams extends FilterByExternalDatabase, SharedFields {
-  genres_type?: GenresType;
+  genres_type?: ExternalDatabaseGenresType;
 }
 
 export interface GenresResponseObject {

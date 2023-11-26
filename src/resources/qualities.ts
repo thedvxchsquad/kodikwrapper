@@ -2,7 +2,9 @@ import type {
   FilterByExternalDatabase, KodikResponse, SharedFields
 } from './shared-types';
 
-export interface QualitiesParams {}
+export interface QualitiesParams {
+}
+
 export interface QualitiesV2Params extends FilterByExternalDatabase, SharedFields {
 }
 

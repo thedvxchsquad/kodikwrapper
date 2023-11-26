@@ -6,7 +6,6 @@ import {
 
 export interface ClientOptions {
   token: string;
-  // agent?: Agent;
   kodikApiUrl?: string;
 }
 

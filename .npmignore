@@ -4,10 +4,11 @@
 /tests
 /scripts
 /src
-/build
+/development
 .gitignore
 .eslintrc.json
-babel.config.json
+tsup.config.ts
+vitest.config.ts
 tsconfig.json
 package-lock.json
 pnpm-lock.yaml

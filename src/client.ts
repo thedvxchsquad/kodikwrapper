@@ -30,22 +30,22 @@ export class Client {
   public KODIK_API_URL: string;
 
   constructor(options: ClientOptions) {
-    this.KODIK_API_URL = options.kodikApiUrl || KODIK_API_URL;
+    this.KODIK_API_URL = options.kodikApiUrl ?? KODIK_API_URL;
     this.axios = axios.create({
       params: {
         token: options.token,
       },
       validateStatus: null,
-      paramsSerializer: (params) => new URLSearchParams(params).toString(),
     });
 
     for (const endpointKey of Object.keys(endpoints)) {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       this[endpointKey] = (params: Record<string, string>) =>
-        this.axios.post(`${this.KODIK_API_URL}/${endpoints[endpointKey]}`, new URLSearchParams(params))
+        this.axios.post(`${this.KODIK_API_URL}/${endpoints[endpointKey]}`, new URLSearchParams(params).toString())
           .then(
             res => {
+              if (typeof res.data !== 'object') throw new ClientError('invalid response');
               if ('error' in res.data) throw new ClientError(res.data.error);
               return res.data;
             }

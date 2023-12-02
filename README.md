@@ -1,16 +1,23 @@
-# kodikwrapper
-A kodikapi.com wrapper for Node.JS
+<p align="center"><img src=".github/logo.svg"></p>
+<p align="center">
+<a href="https://www.npmjs.com/package/kodikwrapper"><img src="https://img.shields.io/npm/v/kodikwrapper.svg?style=flat-square" alt="NPM version"></a>
+<a href="https://www.npmjs.com/package/kodikwrapper"><img src="https://img.shields.io/npm/dt/kodikwrapper.svg?style=flat-square" alt="NPM downloads"></a>
+</p>
 
-| 📖 [Documentation](https://thedvxchsquad.github.io/kodikwrapper/index.html) |
-| ------------------------------------------------------------------------- |
+> kodikwrapper is an implementation of the client API kodikapi.com for Node.js
+
+| 📖 [References](https://thedvxchsquad.github.io/kodikwrapper/index.html) | 📖 [Kodik API docs (needs authorization)](https://bd.kodik.biz/api/info) |
+|--------------------------------------------------------------------------|-------------------------------------------------------------------------:|
 
 ## Установка
 ```bash
 npm i kodikwrapper
+yarn add kodikwrapper
+pnpm add kodikwrapper
 ```
 
 ## Использования
-Смотрите все доступные методы в [📖 Документации](https://thedvxchsquad.github.io/kodikwrapper/index.html).
+Смотрите все доступные методы в [📖 Референсах](https://thedvxchsquad.github.io/kodikwrapper/index.html) или [документации Kodik API](https://bd.kodik.biz/api/info).
 ```typescript
 import { Client } from "kodikwrapper"; // ESM / TypeScript
 // OR

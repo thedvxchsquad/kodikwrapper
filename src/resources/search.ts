@@ -1,6 +1,6 @@
 import type {AllowArray} from '../types';
 import type {
-  KodikResponseWithPagination, MaterialObject,
+  KodikResponse, MaterialObject,
   FilterByExternalDatabase, SharedFields, TranslationType,
   SharedSearchListFields
 } from './shared-types';
@@ -26,4 +26,4 @@ export interface SearchParams extends FilterByExternalDatabase, Omit<SharedField
   episode?: number;
 }
 
-export type SearchResponse = KodikResponseWithPagination<MaterialObject[]>;
+export type SearchResponse = KodikResponse<MaterialObject[]>;

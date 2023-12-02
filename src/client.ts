@@ -35,6 +35,7 @@ export class Client {
       params: {
         token: options.token,
       },
+      responseType: 'json',
       validateStatus: null,
     });
 

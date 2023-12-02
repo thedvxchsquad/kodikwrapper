@@ -1,6 +1,6 @@
 {
   "name": "kodikwrapper",
-  "version": "1.9.9",
+  "version": "2.0.1",
   "description": "A kodikapi.com wrapper for Node.JS",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -18,7 +18,7 @@
     "@typescript-eslint/parser": "^6.12.0",
     "eslint": "^8.54.0",
     "tsup": "^7.2.0",
-    "typedoc": "^0.25.3",
+    "typedoc": "^0.25.4",
     "typescript": "^5.3.2",
     "vitest": "^0.34.6"
   },

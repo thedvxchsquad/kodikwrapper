@@ -189,7 +189,7 @@ export interface TranslationV1Object {
 }
 
 export interface MaterialObject {
-  id: number;
+  id: string;
   title: string;
   title_orig: string;
   other_title: string;

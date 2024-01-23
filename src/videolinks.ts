@@ -1,29 +1,47 @@
 import axios from 'axios';
 
-// parseLink types
-export type KodikParsedLink = KodikParsedLinkParams & KodikParsedLinkExParams;
-
-export interface KodikParsedLinkParams {
+export interface KodikParsedLink {
   type: string;
   id: string;
   hash: string;
   quality: string;
+  ex?: KodikParsedLinkEx;
 }
 
-export interface KodikParsedLinkExParams {
-  d?: string;
-  d_sign?: string;
-  pd?: string;
-  pd_sign?: string;
-  ref?: string;
-  ref_sign?: string;
+export interface KodikParsedLinkEx {
+  urlParams: KodikParsedLinkExUrlParams;
+  translation: KodikParsedLinkExTranslation;
+  skipButtons?: KodikParsedLinkExSkipButtons;
+}
+
+export interface KodikParsedLinkExUrlParams {
+  d: string;
+  d_sign: string;
+  pd: string;
+  pd_sign: string;
+  ref: string;
+  ref_sign: string;
+  translations: boolean;
+  advert_debug: boolean;
+  min_age: number;
+  first_url: boolean;
+}
+
+export interface KodikParsedLinkExTranslation {
+  id: number;
+  title: string;
+}
+
+export interface KodikParsedLinkExSkipButtons {
+  type: string;
+  data: string;
 }
 
 export interface KodikVideos {
   parsed?: KodikParsedLink;
-  links: KodikVideoLinksType;
+  links: KodikVideoLinks;
 }
-export type KodikVideoLinksType = Record<KodikVideoSourceQuality, KodikVideoSource[]>;
+export type KodikVideoLinks = Record<KodikVideoSourceQuality, KodikVideoSource[]>;
 export type KodikVideoSourceQuality = '1080' | '720' | '480' | '360' | '240' | string;
 
 export interface KodikVideoSource {
@@ -53,37 +71,43 @@ export interface VideoLinksGetLinksParams {
 export const kodikPlayerLinkRegexp = /^(?<protocol>http[s]?:|)\/\/(?<host>[a-z0-9]+\.[a-z]+)\/(?<type>[a-z]+)\/(?<id>\d+)\/(?<hash>[0-9a-z]+)\/(?<quality>\d+p)(?:.*)$/;
 
 export class VideoLinks {
-
   static async parseLink({extended: isExtended = false, link: kodikLink}: VideoLinksParseParams): Promise<KodikParsedLink> {
     if (!kodikLink) throw new ParseError('kodikLink is undefined');
     if (!kodikPlayerLinkRegexp.test(kodikLink)) throw new ParseError('kodikLink is not allowed');
-    const linkParams = kodikPlayerLinkRegexp.exec(kodikLink)!;
-    if (!linkParams.groups) throw new ParseError('cannot get \'groups\' from \'linkParams\'');
-    linkParams.groups.protocol = linkParams.groups.protocol.length === 0 ? 'https:' : '';
-    const parsedLink: KodikParsedLink = {
-      hash: linkParams.groups.hash,
-      id: linkParams.groups.id,
-      quality: linkParams.groups.quality,
-      type: linkParams.groups.type
-    };
+
+    const linkParams = kodikPlayerLinkRegexp.exec(kodikLink)?.groups;
+    if (!linkParams) throw new ParseError('cannot get \'groups\' from \'linkParams\'');
+    const {hash, id, quality, type} = linkParams;
+
+    const parsedLink: KodikParsedLink = {hash, id, quality, type};
 
     if (isExtended) {
       try {
-        const page = await axios.get<string>(`${linkParams.groups.protocol}${kodikLink}`);
+        const page = await axios.get<string>(`${linkParams.protocol.length === 0 ? 'https:' : ''}${kodikLink}`);
 
-        console.log(page.data);
+        const urlParams = page.data.match(/var\s+urlParams\s*=\s*'(?<urlParams>[^']+)';/)?.groups?.urlParams;
+        const translation = page.data.match(/var\s+translationId\s*=\s*(?<id>\d+);\s*var\s+translationTitle\s*=\s*"(?<title>[^"]+)";/is)?.groups;
+        const skipButtons = page.data.match(/parseSkipButtons?\("(?<data>[^"]+)"\s*,\s*"(?<type>[^"]+)"\)/is)?.groups;
 
-
-        const pageMatchurlParams = page.data.match(/var\s+urlParams\s*=\s*'(?<urlParams>[^']+)';/);
-        const urlParams = pageMatchurlParams?.groups?.urlParams;
         if (!urlParams) throw new ParseError('cannot get urlParams');
-        const extendedFields = JSON.parse(urlParams) as KodikParsedLinkExParams;
-        return {
-          ...parsedLink,
-          ...extendedFields
+        if (!translation) throw new ParseError('cannot get translation');
+
+        parsedLink.ex = {
+          urlParams: JSON.parse(urlParams) as KodikParsedLinkExUrlParams,
+          translation: {
+            id: +translation.id,
+            title: translation.title
+          },
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          skipButtons,
         };
+
+        return parsedLink;
       } catch (error) {
-        throw new ParseError('unknown error');
+        throw new ParseError('unknown error', {
+          cause: error
+        });
       }
     }
 
@@ -96,15 +120,20 @@ export class VideoLinks {
       extended: true
     });
 
-    const videoInfoResponse = await axios.post(`https://${kodikParsedLink.d ?? 'kodik.info'}${videoInfoUrl}`, null, {
-      params: kodikParsedLink,
+    const videoInfoResponse = await axios.post(`https://${kodikParsedLink.ex?.urlParams.d ?? 'kodik.info'}${videoInfoUrl}`, null, {
+      params: {
+        hash: kodikParsedLink.hash,
+        id: kodikParsedLink.id,
+        type: kodikParsedLink.type,
+        ...kodikParsedLink.ex!.urlParams
+      },
       validateStatus: null
     });
 
     if (typeof videoInfoResponse.data !== 'object') throw new VideoLinksError('videoInfoResponse.data is not object');
     if (typeof videoInfoResponse.data.links !== 'object') throw new VideoLinksError('videoInfoResponse.data.links is not object');
 
-    const kodikVideoLinks = videoInfoResponse.data.links as KodikVideoLinksType;
+    const kodikVideoLinks = videoInfoResponse.data.links as KodikVideoLinks;
     const zCharCode = 'Z'.charCodeAt(0);
 
     for (const [, sources] of Object.entries(kodikVideoLinks)) {
@@ -121,4 +150,10 @@ export class VideoLinks {
 
     return kodikVideos;
   }
+
+  static parseSkipButtons = (skipButtons: KodikParsedLinkExSkipButtons) =>
+    skipButtons.data.split(',').map((timeline) => {
+      const [from, to] = timeline.split('-');
+      return {from, to};
+    });
 }

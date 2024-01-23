@@ -47,6 +47,7 @@ export interface VideoLinksParseParams {
 export interface VideoLinksGetLinksParams {
   link: string;
   extended?: boolean;
+  videoInfoUrl?: string
 }
 
 export const kodikPlayerLinkRegexp = /^(?<protocol>http[s]?:|)\/\/(?<host>[a-z0-9]+\.[a-z]+)\/(?<type>[a-z]+)\/(?<id>\d+)\/(?<hash>[0-9a-z]+)\/(?<quality>\d+p)$/;
@@ -89,40 +90,21 @@ export class VideoLinks {
     return parsedLink;
   }
 
-  static async getLinks({extended: isExtended = false, link: kodikLink}: VideoLinksGetLinksParams): Promise<KodikVideos> {
+  static async getLinks({extended: isExtended = false, link: kodikLink, videoInfoUrl = '/vdu'}: VideoLinksGetLinksParams): Promise<KodikVideos> {
     const kodikParsedLink = await VideoLinks.parseLink({
       link: kodikLink,
       extended: true
     });
 
-    // curl 'https://kodik.info/gvi' \
-    //   -H 'authority: kodik.info' \
-    //   -H 'accept: application/json, text/javascript, */*; q=0.01' \
-    //   -H 'accept-language: ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7,ja;q=0.6' \
-    //   -H 'content-type: application/x-www-form-urlencoded; charset=UTF-8' \
-    //   -H 'dnt: 1' \
-    //   -H 'origin: https://kodik.info' \
-    //   -H 'referer: https://kodik.info/serial/20576/191e6ff83fb13152bf08c291c3d90f8e/720p?episode=1&start_from=0&poster=//raw.github.com/qt-kaneko/Shikiplayer/main/assets/poster.jpg' \
-    //   -H 'sec-ch-ua: "Not_A Brand";v="8", "Chromium";v="120", "Google Chrome";v="120"' \
-    //   -H 'sec-ch-ua-mobile: ?0' \
-    //   -H 'sec-ch-ua-platform: "Windows"' \
-    //   -H 'sec-fetch-dest: empty' \
-    //   -H 'sec-fetch-mode: cors' \
-    //   -H 'sec-fetch-site: same-origin' \
-    //   -H 'user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36' \
-    //   -H 'x-requested-with: XMLHttpRequest' \
-    //   --data-raw 'd=shikimori.one&d_sign=a7f0a161e77915afd0c5d69c1f11d876de3339d6fbdf3496353134c3bad073a1&pd=kodik.info&pd_sign=09ffe86e9e452eec302620225d9848eb722efd800e15bf707195241d9b7e4b2b&ref=https%3A%2F%2Fshikimori.one%2F&ref_sign=3d22feb559035cf9fc8eda7eb7fb01824e1cfdfeaf2dd4d3179a605ff602e38b&bad_user=false&type=seria&hash=1204a84975f13e72487a22f264a7aac4&id=549383&info=%7B%7D' \
-    //   --compressed
-
-    const gviResponse = await axios.post(`https://${kodikParsedLink.d}/gvi`, null, {
+    const videoInfoResponse = await axios.post(`https://${kodikParsedLink.d ?? 'kodik.info'}${videoInfoUrl}`, null, {
       params: kodikParsedLink,
       validateStatus: null
     });
 
-    if (typeof gviResponse.data !== 'object') throw new VideoLinksError('gviResponse.data is not object');
-    if (typeof gviResponse.data.links !== 'object') throw new VideoLinksError('gviResponse.data.links is not object');
+    if (typeof videoInfoResponse.data !== 'object') throw new VideoLinksError('videoInfoResponse.data is not object');
+    if (typeof videoInfoResponse.data.links !== 'object') throw new VideoLinksError('videoInfoResponse.data.links is not object');
 
-    const kodikVideoLinks = gviResponse.data.links as KodikVideoLinksType;
+    const kodikVideoLinks = videoInfoResponse.data.links as KodikVideoLinksType;
     const zCharCode = 'Z'.charCodeAt(0);
 
     for (const [, sources] of Object.entries(kodikVideoLinks)) {

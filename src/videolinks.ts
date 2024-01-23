@@ -50,7 +50,7 @@ export interface VideoLinksGetLinksParams {
   videoInfoUrl?: string
 }
 
-export const kodikPlayerLinkRegexp = /^(?<protocol>http[s]?:|)\/\/(?<host>[a-z0-9]+\.[a-z]+)\/(?<type>[a-z]+)\/(?<id>\d+)\/(?<hash>[0-9a-z]+)\/(?<quality>\d+p)$/;
+export const kodikPlayerLinkRegexp = /^(?<protocol>http[s]?:|)\/\/(?<host>[a-z0-9]+\.[a-z]+)\/(?<type>[a-z]+)\/(?<id>\d+)\/(?<hash>[0-9a-z]+)\/(?<quality>\d+p)(?:.*)$/;
 
 export class VideoLinks {
 
@@ -69,11 +69,11 @@ export class VideoLinks {
 
     if (isExtended) {
       try {
-        const page = await axios.get<string>(`${linkParams.groups.protocol}${kodikLink}`, {
-          headers: {
-            'Origin': `https://${linkParams?.groups?.host ?? 'kodik.info'}`
-          },
-        });
+        const page = await axios.get<string>(`${linkParams.groups.protocol}${kodikLink}`);
+
+        console.log(page.data);
+
+
         const pageMatchurlParams = page.data.match(/var\s+urlParams\s*=\s*'(?<urlParams>[^']+)';/);
         const urlParams = pageMatchurlParams?.groups?.urlParams;
         if (!urlParams) throw new ParseError('cannot get urlParams');

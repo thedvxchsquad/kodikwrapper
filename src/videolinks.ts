@@ -114,7 +114,7 @@ export class VideoLinks {
     return parsedLink;
   }
 
-  static async getLinks({extended: isExtended = false, link: kodikLink, videoInfoUrl = '/vdu'}: VideoLinksGetLinksParams): Promise<KodikVideos> {
+  static async getLinks({extended: isExtended = false, link: kodikLink, videoInfoUrl = '/kor'}: VideoLinksGetLinksParams): Promise<KodikVideos> {
     const kodikParsedLink = await VideoLinks.parseLink({
       link: kodikLink,
       extended: true

@@ -1,24 +1,20 @@
 {
   "name": "kodikwrapper",
-  "version": "2.1.0",
+  "version": "3.0.0",
   "description": "A kodikapi.com wrapper for Node.JS",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsup",
-    "test": "vitest",
-    "docs": "typedoc --out docs src/index.ts --gitRevision master"
-  },
-  "dependencies": {
-    "axios": "^1.6.5"
+    "test": "vitest"
   },
   "devDependencies": {
-    "@types/node": "^20.11.5",
+    "@stylistic/eslint-plugin": "^1.6.2",
+    "@types/node": "^18.0.0",
     "@typescript-eslint/eslint-plugin": "^6.19.1",
     "@typescript-eslint/parser": "^6.19.1",
     "eslint": "^8.56.0",
     "tsup": "^7.2.0",
-    "typedoc": "^0.25.7",
     "typescript": "^5.3.3",
     "vitest": "^0.34.6"
   },

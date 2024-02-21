@@ -1,5 +1,5 @@
-import {describe, it, expect} from 'vitest';
-import {VideoLinks} from '../src';
+import { describe, it, expect } from 'vitest';
+import { VideoLinks } from '../src';
 
 describe('testing class VideoLinks', () => {
   it('Parse link correctly', async () => {

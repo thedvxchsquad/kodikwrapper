@@ -1,4 +1,4 @@
-import type {AllowArray} from '../types';
+import type { AllowArray } from '../types';
 import type {
   KodikResponse, MaterialObject,
   FilterByExternalDatabase, SharedFields, TranslationType,

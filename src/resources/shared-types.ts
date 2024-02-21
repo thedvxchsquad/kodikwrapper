@@ -1,4 +1,4 @@
-import type {AllowArray, Nullable} from '../types';
+import type { AllowArray, Nullable } from '../types';
 
 export type MaterialMovieType =
   | 'foreign-movie'

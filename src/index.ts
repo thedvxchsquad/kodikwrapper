@@ -1,3 +1,3 @@
 export * from './client';
-export * from './videolinks';
+export * from './video-links';
 export * from './resources';

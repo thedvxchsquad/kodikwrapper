@@ -1,7 +1,4 @@
-import axios, {AxiosInstance} from 'axios';
-import {
-  APIMethods
-} from './schema';
+import type { APIMethods } from './schema';
 
 export interface ClientOptions {
   token: string;
@@ -9,12 +6,11 @@ export interface ClientOptions {
 }
 
 const KODIK_API_URL = 'https://kodikapi.com';
-const endpoints: Record<string, string> = {
-  ...(['countries', 'genres', 'list', 'qualities', 'search', 'translations', 'years'])
-    .reduce(
-      (p, v) => (p[v] = v, p),
-      <Record<string, string>>{}
-    ),
+
+const endpointsArr: (keyof APIMethods)[] =
+  ['countries', 'genres', 'list', 'qualities', 'search', 'translations', 'years', 'qualitiesV2', 'translationsV2'];
+
+const remapEndpoints: Record<string, string> = {
   qualitiesV2: 'qualities/v2',
   translationsV2: 'translations/v2',
 };
@@ -25,37 +21,39 @@ export class ClientError extends Error {
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
 export class Client {
-  private axios: AxiosInstance;
   // private agent: Agent;
   public KODIK_API_URL: string;
 
-  constructor(options: ClientOptions) {
-    this.KODIK_API_URL = options.kodikApiUrl ?? KODIK_API_URL;
-    this.axios = axios.create({
-      params: {
-        token: options.token,
-      },
-      responseType: 'json',
-      validateStatus: null,
-    });
+  constructor({ token, kodikApiUrl }: ClientOptions) {
+    this.KODIK_API_URL = kodikApiUrl ?? KODIK_API_URL;
 
-    for (const endpointKey of Object.keys(endpoints)) {
+    for (const endpointKey of endpointsArr) {
+      const endpoint = remapEndpoints[endpointKey] ?? endpointKey;
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       this[endpointKey] = (params: Record<string, string>) =>
-        this.axios.post(`${this.KODIK_API_URL}/${endpoints[endpointKey]}`, new URLSearchParams(params).toString())
+        fetch(`${this.KODIK_API_URL}/${endpoint}?${new URLSearchParams({ token, ...params }).toString()}`, {
+          method: 'POST',
+        })
+          .then(async (res) => {
+            if (res.headers.get('content-type') !== 'application/json') throw new ClientError(`invalid response (expected content-type application/json, but got ${res.headers.get('content-type')})`);
+            const json = await res.json();
+            if (typeof json !== 'object') throw new ClientError(`expected json as an object, but got a ${typeof json}`);
+            return json as object;
+          })
           .then(
-            res => {
-              if (typeof res.data !== 'object') throw new ClientError('invalid response');
-              if ('error' in res.data) throw new ClientError(res.data.error);
-              return res.data;
+            (json) => {
+              if ('error' in json) throw new ClientError(json.error as string);
+              return json;
             }
           );
     }
+  }
 
+  static fromToken(token: string, options?: Omit<ClientOptions, 'token'>) {
+    return new Client({ ...options, token });
   }
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
-export interface Client extends APIMethods {
-}
+export interface Client extends APIMethods {}

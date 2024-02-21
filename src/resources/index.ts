@@ -1,8 +1,8 @@
-export * from './countries';
-export * from './genres';
-export * from './list';
-export * from './qualities';
-export * from './search';
-export * from './translations';
-export * from './years';
-export * from './shared-types';
+export type * from './countries';
+export type * from './genres';
+export type * from './list';
+export type * from './qualities';
+export type * from './search';
+export type * from './translations';
+export type * from './years';
+export type * from './shared-types';

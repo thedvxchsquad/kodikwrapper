@@ -1,4 +1,4 @@
-import { ParseError, VideoLinksError } from './errors';
+import { VideoLinksError } from './errors';
 import type { ObjectOrUnknown } from './types';
 
 export const KODIK_PLAYER_DOMAIN = 'kodik.info';
@@ -63,13 +63,22 @@ export const kodikPlayerLinkRegexp = /^(?<protocol>http[s]?:|)\/\/(?<host>[a-z0-
 
 export class VideoLinks {
   static async parseLink<Extended extends boolean>({ extended, link }: VideoLinksParseParams<Extended>): Promise<KodikParsedLink<Extended>> {
-    if (!link) throw new ParseError('link is undefined');
+    if (!link)
+      throw new VideoLinksError({
+        code: 'parse-link-invalid',
+        description: 'link is not provided',
+        data: { link }
+      });
 
     const kodikLink = this.normalizeKodikLink(link);
-    if (!kodikPlayerLinkRegexp.test(link)) throw new ParseError('kodikLink is not allowed');
+    if (!kodikPlayerLinkRegexp.test(link))
+      throw new VideoLinksError({
+        code: 'parse-link-invalid',
+        description: 'link is not valid',
+        data: { link }
+      });
 
-    const linkParams = kodikPlayerLinkRegexp.exec(kodikLink)?.groups;
-    if (!linkParams) throw new ParseError('cannot get \'groups\' from \'linkParams\'');
+    const linkParams = kodikPlayerLinkRegexp.exec(kodikLink)!.groups!;
 
     const { host, hash, id, quality, type } = linkParams;
     const parsedLink: KodikParsedLink = {
@@ -85,8 +94,16 @@ export class VideoLinks {
     const skipButtons = page.match(/parseSkipButtons?\("(?<data>[^"]+)"\s*,\s*"(?<type>[^"]+)"\)/is)?.groups;
     const playerSingleUrl = page.match(/src="(?<link>\/assets\/js\/app\.player_single\.[a-z0-9]+\.js)"/is)?.groups?.link;
 
-    if (!urlParams) throw new ParseError('cannot get urlParams');
-    if (!translation) throw new ParseError('cannot get translation');
+    if (!urlParams) throw new VideoLinksError({
+      code: 'parse-link-ex-invalid',
+      description: 'cannot get url params',
+      data: { link, page }
+    });
+    if (!translation) throw new VideoLinksError({
+      code: 'parse-link-ex-invalid',
+      description: 'cannot get translation',
+      data: { link, page }
+    });
 
     const extendedParsedLink: KodikParsedLink<true> = {
       ...parsedLink,
@@ -126,14 +143,26 @@ export class VideoLinks {
     );
     const videoInfoResponse = await fetch(url);
     if (videoInfoResponse.headers.get('content-type') !== 'application/json')
-      throw new VideoLinksError('videoInfoResponse is not json');
+      throw new VideoLinksError({
+        code: 'get-links-invalid-response',
+        description: 'videoInfoResponse is not json',
+        data: { videoInfoResponse }
+      });
 
     const videoInfoJson = await videoInfoResponse.json();
 
     if (typeof videoInfoJson !== 'object' || videoInfoJson === null)
-      throw new VideoLinksError('videoInfoJson is not object');
+      throw new VideoLinksError({
+        code: 'get-links-invalid-response',
+        description: 'videoInfoJson is not object',
+        data: { videoInfoResponse, videoInfoJson }
+      });
     if (typeof videoInfoJson.links !== 'object')
-      throw new VideoLinksError('videoInfoJson.links is not object');
+      throw new VideoLinksError({
+        code: 'get-links-invalid-response',
+        description: 'videoInfoJson.links is not object',
+        data: { videoInfoResponse, videoInfoJson }
+      });
 
     const links = videoInfoJson.links as KodikVideoLinks;
     const zCharCode = 'Z'.charCodeAt(0);
@@ -141,10 +170,11 @@ export class VideoLinks {
     // decrypt source links
     for (const [, sources] of Object.entries(links)) {
       for (const source of sources) {
-        source.src = Buffer.from(source.src.replace(/[a-zA-Z]/g, e => {
+        const decryptedBase64 = source.src.replace(/[a-zA-Z]/g, e => {
           let eCharCode = e.charCodeAt(0);
           return String.fromCharCode((eCharCode <= zCharCode ? 90 : 122) >= (eCharCode = eCharCode + 13) ? eCharCode : eCharCode - 26);
-        }), 'base64').toString('utf8');
+        });
+        source.src = atob(decryptedBase64);
       }
     }
 

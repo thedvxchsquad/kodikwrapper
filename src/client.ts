@@ -5,7 +5,7 @@ export interface ClientOptions {
   kodikApiUrl?: string;
 }
 
-const KODIK_API_URL = 'https://kodikapi.com';
+export const KODIK_API_URL = 'https://kodikapi.com';
 
 const endpointsArr: (keyof APIMethods)[] =
   ['countries', 'genres', 'list', 'qualities', 'search', 'translations', 'years', 'qualitiesV2', 'translationsV2'];
@@ -21,7 +21,6 @@ export class ClientError extends Error {
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
 export class Client {
-  // private agent: Agent;
   public KODIK_API_URL: string;
 
   constructor({ token, kodikApiUrl }: ClientOptions) {

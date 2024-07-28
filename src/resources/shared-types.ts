@@ -171,6 +171,7 @@ export interface EpisodesObject {
 
 export interface SeasonObject {
   link: string;
+  title?: string;
   episodes?: EpisodesObject;
 }
 

@@ -1,9 +1,20 @@
 {
   "name": "kodikwrapper",
-  "version": "3.0.1",
+  "version": "3.0.2",
   "description": "A kodikapi.com wrapper for Node.JS",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "type": "commonjs",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.mts",
+        "default": "./dist/index.mjs"
+      },
+      "require": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    }
+  },
   "scripts": {
     "build": "rm -rf ./dist && tsup",
     "test": "vitest"

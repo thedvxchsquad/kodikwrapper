@@ -139,7 +139,8 @@ export class VideoLinks {
     const { host, quality, ...parsed } = await VideoLinks.parseLink({ link });
 
     const url = new URL(
-      `https://${host}${videoInfoEndpoint}?${new URLSearchParams(parsed).toString()}`
+      `${videoInfoEndpoint}?${new URLSearchParams(parsed).toString()}`,
+      `https://${host}`
     );
     const videoInfoResponse = await fetch(url);
     if (videoInfoResponse.headers.get('content-type') !== 'application/json')

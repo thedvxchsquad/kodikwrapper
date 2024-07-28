@@ -31,7 +31,7 @@ export class Client {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       this[endpointKey] = (params: Record<string, string>) =>
-        fetch(`${this.KODIK_API_URL}/${endpoint}?${new URLSearchParams({ token, ...params }).toString()}`, {
+        fetch(new URL(`${endpoint}?${new URLSearchParams({ token, ...params }).toString()}`,this.KODIK_API_URL), {
           method: 'POST',
         })
           .then(async (res) => {
